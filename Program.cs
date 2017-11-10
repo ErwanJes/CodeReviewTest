@@ -1,181 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ConsoleApplication4
 {
-  public class LocalNotebook
-  {
-    private string localFilePath;
-    private bool error = false;
-    public string content;
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Text.RegularExpressions;
 
-    public LocalNotebook(string localFilePath)
+    internal class Program
     {
-      this.localFilePath = localFilePath;
-    }
+        private static void GetLocalNotebook(string inputFile, string outputFile)
+        {
+            if (string.IsNullOrEmpty(inputFile))
+                throw new Exception("Input file not specified.");
 
-    public string load()
-    {
-      if (localFilePath != null && localFilePath != "")
+            string filePath = Path.GetFullPath(inputFile);
+
+            if (File.Exists(filePath) == false)
+                throw new Exception($"Input file not found: \"{filePath}\"");
+
+            File.WriteAllText(outputFile, filePath);
+
+            Console.WriteLine($"Saved local notebook \"{filePath}\" to \"{outputFile}\".");
+        }
+
+        private static void GetRemoteNotebook(string url, string outputFile)
+        {
+            var uri = new Uri(url);
+
+            File.WriteAllText(outputFile, (new WebClient()).DownloadString(uri));
+
+            Console.WriteLine($"Downloaded remote notebook \"{uri.AbsoluteUri}\" to \"{outputFile}\".");
+        }
+
+        private static void Main(string[] args)
+        {
+            try
             {
-        try
-        {
-          content = File.ReadAllText(localFilePath);
-          return content;
+                if (args.Length < 2)
+                    throw new Exception("Notebook [source] and [destination] arguments are required!");
+
+                var source = args[0].Trim();
+                var destination = args[1].Trim();
+
+                if (Regex.Match(source.ToUpperInvariant(), "^HTTP://.+$").Success)
+                    GetRemoteNotebook(source, destination);
+                else
+                    GetLocalNotebook(source, destination);
+            }
+            catch (Exception exn)
+            {
+                Console.WriteLine(exn.Message);
+            }
         }
-        catch (Exception)
-        {
-        }
-      }
-      error = true;
-      return null;
     }
-
-    public int loadedState()
-    {
-      // not loaded
-      if (content == null)
-      {
-        return -1;
-      }
-      else if (error)
-      {
-        return 0;
-      }
-      // ok
-      else
-      {
-        return 1;
-      }
-    }
-
-    public bool canBeLoaded(string path)
-    {
-      try
-      {
-        string trimmedPath = path.Trim();
-        if (trimmedPath.Contains("\\"))
-        {
-          string fullPath = Path.GetFullPath(trimmedPath);
-          return true;
-        }
-      }
-      catch (Exception ex)
-      {
-        Debug.WriteLine("error");
-      }
-      return false;
-    }
-  }
-
-  public class CloudNotebook
-  {
-    private string fileUrl;
-    private bool error = false;
-    public string content;
-
-    public CloudNotebook(string fileUrl)
-    {
-      this.fileUrl = fileUrl;
-    }
-
-    public string load()
-    {
-      if (fileUrl != null && fileUrl != "")
-      {
-     WebClient client = new WebClient();
-      content = client.DownloadString(fileUrl);
-      return content;
-      }
-      error = true;
-      return null;
-    }
-
-    public int loadedState()
-    {
-      // not loaded
-      if (content == null)
-      {
-        return -1;
-      }
-      else if (error)
-      {
-        return 0;
-      }
-      // ok
-      else
-      {
-        return 1;
-      }
-    }
-  }
-
-  public class Storage
-  {
-    public static void save(string key, string content)
-    {
-      // `content` is empty by default
-      if (content == null)
-      {
-        content = "";
-      }
-      //... save
-    }
-  }
-
-  class Program
-  {
-    /// <summary>
-    /// Try to load the content of `args`.
-    /// </summary>
-    /// <param name="args">local file path or url of text files</param>
-    static void Main(string[] args)
-    {
-      LoadAllNotebooks(args);
-    }
-
-    /// <summary>
-    /// Try to load the content of each file path which can be local file path or web url.
-    /// </summary>
-    /// <param name="filePathes"></param>
-    static void LoadAllNotebooks(string[] filePathes)
-    {
-      for (int i = 0; i < filePathes.Count(); i++)
-      {
-        string filePath = filePathes[i];
-        CloudNotebook cloudN = null;
-        LocalNotebook ln = new LocalNotebook(filePath);
-        bool canBeLoaded = ln.canBeLoaded(filePath);
-        if (canBeLoaded)
-        {
-          ln.load();
-          if (ln.loadedState() == 1)
-          {
-            Storage.save(filePath, ln.content);
-          }
-        }
-        else
-        {
-          cloudN = new CloudNotebook(filePath);
-          cloudN.load();
-          if (cloudN.loadedState() == 1)
-          {
-            Storage.save(filePath, cloudN.content);
-          }
-        }
-
-        // save the first notebook
-        if (i == 0)
-        {
-          Storage.save("firstNotebook", filePath);
-        }
-      }
-    }
-  }
 }
