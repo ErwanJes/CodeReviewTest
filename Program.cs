@@ -137,8 +137,7 @@ namespace ConsoleApplication4
     /// <param name="args">local file path or url of text files</param>
     static void Main(string[] args)
     {
-      string[] localPath = { "C:\\Users\\erwanj\\AppData\\Local\\Packages\\MyScriptInternal.Nebo_1rjv6qr7skr92\\LocalState\\notes\\ae5079420a6650d81209d3b256ff1ed2\\com.myscript.nebo.dropbox.cache" };
-      LoadAllNotebooks(localPath);
+      LoadAllNotebooks(args);
     }
 
     /// <summary>
