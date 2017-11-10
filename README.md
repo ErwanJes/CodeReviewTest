@@ -7,6 +7,8 @@ Hello and welcome to the `CodeReviewTest` project.
 
 I started this project to ask a review from interviews with developers. I want to know what they think of this code and mostly how would they improve it.
 
+The functional part must not be changed. Try to understand what it does and make it better.
+
 ## Technical precision
 
 The project can be run on Windows using Visual Studio. The code is made using C# but the majority of the flaws can be found in others languages.
