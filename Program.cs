@@ -132,18 +132,17 @@ namespace ConsoleApplication4
   class Program
   {
     /// <summary>
-    /// Try to load the content of `args`.
+    /// Mandatory method called first when this program is launched.
+    /// /!\ No need to change it.
+    /// We received a list of URIs that can be local ("C:\\") or remote ("http(s)://") of text files
+    /// The goal is to get the content of each file and save it (using `Storiage.save()`.
     /// </summary>
-    /// <param name="args">local file path or url of text files</param>
+    /// <param name="args">a list of URIs</param>
     static void Main(string[] args)
     {
       LoadAllNotebooks(args);
     }
 
-    /// <summary>
-    /// Try to load the content of each file path which can be local file path or web url.
-    /// </summary>
-    /// <param name="filePathes"></param>
     static void LoadAllNotebooks(string[] filePathes)
     {
       for (int i = 0; i < filePathes.Count(); i++)
